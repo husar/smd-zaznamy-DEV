@@ -231,31 +231,7 @@ if(empty($modul)){$modul="mod_404.php";}
                                             <i class="fa fa-group"></i><span class="title">Vytvoriť skupinu</span>
                                         </a>
                                    </li>   
-								<li class="nav-item  ">
-                                        <a href="?modul=oprava-modulov/vlozit-zaznam" class="nav-link ">
-                                            <span class="title">Oprava modulov</span>
-                                        </a>
-                                   </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=spotreba-cinu/vlozit-zaznam" class="nav-link ">
-                                            <span class="title">Spotreba cínu</span>
-                                        </a>
-                                   </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=preskusanie-esd/vlozit-zaznam" class="nav-link ">
-                                            <span class="title">ESD Test</span>
-                                        </a>
-                                   </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=vyroba/cinova-vlna/vlozit-zaznam" class="nav-link ">
-                                            <span class="title">Výroba - cínova vlna</span>
-                                        </a>
-                                   </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=vyroba/osadzanie-smd/vlozit-zaznam" class="nav-link ">
-                                            <span class="title">Výroba - Osádzanie SMD</span>
-                                        </a>
-                                   </li>
+								
 							
 									<li class="heading">
                                 <h3 class="uppercase"><hr></h3>
@@ -273,30 +249,10 @@ if(empty($modul)){$modul="mod_404.php";}
                                             <i class="fa fa-book fa-fw"></i><span class="title">Spravovanie skupín</span>
                                         </a>
                                    </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=spotreba-cinu/zaznamy" class="nav-link ">
-                                            <span class="title">Spotreba cínu</span>
-                                        </a>
-                                   </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=preskusanie-esd/zaznamy" class="nav-link ">
-                                            <span class="title">ESD Test</span>
-                                        </a>
-                                   </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=vyroba/cinova-vlna/zaznamy" class="nav-link ">
-                                            <span class="title">Výroba - cínova vlna</span>
-                                        </a>
-                                   </li>
-								   <li class="nav-item  ">
-                                        <a href="?modul=vyroba/osadzanie-smd/zaznamy" class="nav-link ">
-                                            <span class="title">Výroba - Osádzanie SMD</span>
-                                        </a>
-                                   </li>
+								  
                           
                                 </ul>
-                            </li>
-                        </ul>
+                          
                         <!-- END SIDEBAR MENU -->
                         <!-- END SIDEBAR MENU -->
                     </div>

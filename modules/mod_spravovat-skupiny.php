@@ -41,7 +41,7 @@ if($user->isAdmin()){
                                                 <div class="form-group">
                                                     
                                                     <div class="col-md-2">
-                                                    Meno:
+                                                    Názov skupiny:
                                                     <input class="form-control" type="text" placeholder="Meno"  name="meno" value="<?php echo $meno ?>">		
 													</div>
                                                    <div class="col-md-2">
@@ -60,12 +60,22 @@ if($user->isAdmin()){
                                                     <div class="col-md-2">
                                                     Zoradiť podľa:
                                                     <select name="zoradenie" class="form-control">
-                                                        <option value="" >Zoradiť podľa</option>
                                                         <option value="id_skupiny" <?php echo ($zoradenie == "id_skupiny")? 'selected':'' ?>>ID skupiny</option>
                                                         <option value="menoBD" <?php echo ($zoradenie == "menoBD")? 'selected':'' ?>>Názov</option>
-                                                        
+                                                        <option value="datum_pridania" <?php echo ($zoradenie == "datum_pridania")? 'selected':'' ?>>Dátum vytvorenia skupiny</option>
+                                                        <option value="pocet_zamestnancov" <?php echo ($zoradenie == "pocet_zamestnancov")? 'selected':'' ?>>Počet zamestnancov v skupine</option>
                                                     </select>
                                                     </div>
+                                                    <div class="form-group">
+                                                    <!--<label class="col-md-2 control-label">Usporiadať</label>-->
+                                                    <div class="col-md-2">
+                                                    <br>
+													    <input type="radio" name="srt" value="vzostupne" <?php echo ($_POST['srt'] != "zostupne")? 'checked':''?>> Vzostupne
+                                                        <input type="radio" name="srt" value="zostupne" <?php echo ($_POST['srt'] == "zostupne")? 'checked':''?>> Zostupne
+                   
+													</div>
+														
+                                                </div>
                                                 </div>
 												
                                                
@@ -116,14 +126,17 @@ if($user->isAdmin()){
 														  <th>Názov skupiny</th>
 														  <th>Popis</th>
                                                           <th>Dátum vzniku</th>
+                                                          <th>Počet zamestnancov v skupine</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
 												<?php
 																				
-				
+				                            if($_POST['zoradenie']=="pocet_zamestnancov"){
+                                                $search_query="SELECT groups.*, COUNT(user_groups.osobne_cislo) AS pocet_zamestnancov FROM groups INNER JOIN user_groups ON groups.id_skupiny=user_groups.id_skupiny ";
+                                            }else{
 												$search_query="SELECT * FROM groups ";
-                                        
+                                            }
                                         if(!empty($_POST['meno'])){
                                             $conditions[]= "menoBD LIKE ('%".url_slug($_POST['meno'])."%')";
                                         }
@@ -144,11 +157,16 @@ if($user->isAdmin()){
                                         if(!empty($_POST['zoradenie'])){
                                             if($_POST['zoradenie']=="id_skupiny"){
                                                 $sql.="ORDER BY ".$_POST['zoradenie'];
+                                            }elseif($_POST['zoradenie']=="pocet_zamestnancov"){
+                                                $sql.="GROUP BY user_groups.id_skupiny ORDER BY pocet_zamestnancov";
                                             }else{
                                                 $sql.="ORDER BY LOWER(".$_POST['zoradenie'].")";
                                             }
                                         }
-                                   
+                                        
+                                        if($_POST['srt']=='zostupne'){
+                                            $sql.=" DESC";
+                                        }
 
                                         $apply_zaznamy=mysqli_query($connect,$sql);
 												while($result_zaznamy=mysqli_fetch_array($apply_zaznamy)){
@@ -158,6 +176,13 @@ if($user->isAdmin()){
 														<td> <?php echo $result_zaznamy['meno']; ?></td>
 														<td> <?php echo $result_zaznamy['popis']; ?></td>
 														<td> <?php echo $result_zaznamy['datum_pridania']; ?></td>
+                                                   <td>
+                                                    <?php 
+                                                    $query = "SELECT COUNT(osobne_cislo) FROM user_groups WHERE id_skupiny = '".$result_zaznamy['id_skupiny']."'";
+                                                    $result = mysqli_query($connect,$query);
+                                                    $skuska=mysqli_fetch_array($result);
+                                                    echo $skuska[0];?>
+                                                       </td>                                                     
 																												
 														<td>
                                                             <form method="post"> 
@@ -165,7 +190,7 @@ if($user->isAdmin()){
                                                                 <input type="hidden" name="osobne_cislo" value="<?php echo $result_zaznamy['osobne_cislo'] ?>">
                                                                 <button type="button" class="btn"  title="Zmazať zamestnanca" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-pouzivatelov/zaznamy&os_cis=<?php echo $result_zaznamy['osobne_cislo'] ?>';"><i class="fa fa-trash" ></i></button>
                                                                 
-                                                                <button class="btn" type="submit" formaction="index.php?modul=upravit-skupinu/vlozit-zaznam&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>"><i class="fa fa-edit"></i></button>
+                                                                <button class="btn" type="submit" formaction="index.php?modul=upravit-skupinu/vlozit-zaznam&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>&meno_skupiny=<?php echo $result_zaznamy['meno']?>"><i class="fa fa-edit"></i></button>
                                                             </form>
                                                             
                                                         </td>
@@ -200,6 +225,7 @@ if($user->isAdmin()){
 														  <th>Názov skupiny</th>
 														  <th>Popis</th>
                                                           <th>Dátum vzniku</th>
+                                                          <th>Počet zamestnancov v skupine</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -215,14 +241,20 @@ if($user->isAdmin()){
 														<td> <?php echo $result_zaznamy['meno']; ?></td>
 														<td> <?php echo $result_zaznamy['popis']; ?></td>
 														<td> <?php echo $result_zaznamy['datum_pridania']; ?></td>
-														
+														<td>
+                                                        <?php 
+                                                        $query = "SELECT COUNT(osobne_cislo) FROM user_groups WHERE id_skupiny = '".$result_zaznamy['id_skupiny']."'";
+                                                        $result = mysqli_query($connect,$query);
+                                                        $skuska=mysqli_fetch_array($result);
+                                                        echo $skuska[0];?>
+                                                        </td>
 												        <td>
                                                             <form method="post"> 
                                                                 
                                                                 <input type="hidden" name="id_skupiny" value="<?php echo $result_zaznamy['id_skupiny'] ?>">
                                                                 <button type="button" class="btn"  title="Odstrániť skupinu" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-skupiny/zaznamy&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>';"><i class="fa fa-trash" ></i></button>
                                                                 
-                                                                <button class="btn" type="submit" formaction="index.php?modul=upravit-skupinu/vlozit-zaznam&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>"><i class="fa fa-edit"></i></button>
+                                                                <button class="btn" type="submit" formaction="index.php?modul=upravit-skupinu/vlozit-zaznam&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>&meno_skupiny=<?php echo $result_zaznamy['meno']?>&popis_skupiny=<?php echo $result_zaznamy['popis']?>"><i class="fa fa-edit"></i></button>
                                                             </form>
                                                             
                                                         </td>

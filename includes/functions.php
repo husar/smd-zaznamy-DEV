@@ -175,6 +175,8 @@ function insertToGroup(){
     }
 }
 
+
+
 function showUsersData(){
     global $connect;
     $query = "SELECT * FROM employees WHERE osobne_cislo = '".$_POST['osobne_cislo']."'";

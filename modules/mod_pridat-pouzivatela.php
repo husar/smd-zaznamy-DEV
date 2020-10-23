@@ -115,7 +115,7 @@
                                                     <label class="col-md-3 control-label">Heslo</label>
                                                     <div class="col-md-9">
 													
-													<input class="form-control" size="16" type="text" placeholder="Heslo" name="heslo" value="<?php echo isset($_POST['heslo'])?$_POST['heslo']:randomPassword() ?>"  >
+													<input class="form-control" size="16" type="text" placeholder="Heslo" name="heslo" value="<?php echo isset($_POST['heslo'] )?$_POST['heslo']:randomPassword() ?>"  >
                                                        <br>
                                                         
 													</div>
@@ -126,6 +126,9 @@
                                             <div class="form-actions right1">
                                                 
                                                 <button type="submit" class="btn blue" name="submit">Zaznamenať</button>
+                                            </div>
+                                            <div class="form-actions right1">
+                                                
                                             </div>
                                         </form>
 									<div class="form-group">

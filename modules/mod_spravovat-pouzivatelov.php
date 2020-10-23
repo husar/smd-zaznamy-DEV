@@ -21,20 +21,32 @@ if($user->isAdmin()){
     $toDate="";
     $skupina=0;
     $cislo_karty="";
-    if(isset($_POST['search'])){
-        $os_cis = $_POST['os_cis'];
-        $meno = $_POST['meno'];
-        $priezvisko = $_POST['priezvisko'];
-        $ldap = $_POST['ldap'];
-        $aktivny = $_POST['aktivny'];
-        $zoradenie = $_POST['zoradenie'];
-        $fromDate = $_POST['fromDate'];
-        $toDate = $_POST['toDate'];
-        $skupina = $_POST['skupina'];
-        $cislo_karty = $_POST['cislo_karty'];
+    if(isset($_GET['search'])){
+        $os_cis = $_GET['os_cis'];
+        $meno = $_GET['meno'];
+        $priezvisko = $_GET['priezvisko'];
+        $ldap = $_GET['ldap'];
+        $aktivny = $_GET['aktivny'];
+        $zoradenie = $_GET['zoradenie'];
+        $fromDate = $_GET['fromDate'];
+        $toDate = $_GET['toDate'];
+        $skupina = $_GET['skupina'];
+        $cislo_karty = $_GET['cislo_karty'];
     }
     
+    /*$anonymised = array();*/
+    
     ?>
+    
+    <?php 
+                                                    if(isset($_POST["anonymise"])){
+                                                        $query = "UPDATE employees SET anonym = CASE WHEN anonym=1 THEN 2 ELSE 1 END WHERE osobne_cislo='".$_POST['osobne_cislo']."'";
+                                                        $result = mysqli_query($connect,$query);
+                                                        
+                                                    } 
+                                                    
+                                                    /*unset($_POST["anonymise"]);*/
+                                                    ?>
  <div class="portlet box blue">
                                <!-- //****************//
                                     //*****Filter*****//
@@ -48,10 +60,12 @@ if($user->isAdmin()){
                                     </div>
                                     
                                     <div class="portlet-body form">
-                                        <form class="form-horizontal" role="form" method="post">
+                                        <form class="form-horizontal" role="form" method="get" >
                                             <div class="form-body">
                                                 <div class="form-group">
                                                     
+                                                    <input type="hidden" name="modul" value="spravovat-pouzivatelov/zaznamy">	
+													
                                                     <div class="col-md-2">
                                                     Osobné číslo:
                                                     <input class="form-control" type="text" placeholder="Osobne číslo"  name="os_cis" pattern="[0-9]+" value="<?php echo $os_cis ?>">	
@@ -113,12 +127,23 @@ if($user->isAdmin()){
                                                     <div class="col-md-2">
                                                     Zoradiť podľa:
                                                     <select name="zoradenie" class="form-control">
-                                                        <option value="" >Zoradiť podľa</option>
+                                                        
                                                         <option value="osobne_cislo" <?php echo ($zoradenie == "osobne_cislo")? 'selected':'' ?>>Osobné číslo</option>
                                                         <option value="menoBD" <?php echo ($zoradenie == "menoBD")? 'selected':'' ?>>Meno</option>
-                                                        <option value="priezviskoBD" <?php echo ($zoradenie == "priezviskoDB")? 'selected':'' ?>>Priezvisko</option>
+                                                        <option value="priezviskoBD" <?php echo ($zoradenie == "priezviskoBD")? 'selected':'' ?>>Priezvisko</option>
+                                                        <option value="datum_pridania" <?php echo ($zoradenie == "datum_pridania")? 'selected':'' ?>>Dátum pridania zamestnanca</option>
                                                     </select>
                                                     </div>
+                                                    <div class="form-group">
+                                                    <!--<label class="col-md-2 control-label">Usporiadať</label>-->
+                                                    <div class="col-md-2">
+                                                    <br>
+													    <input type="radio" name="srt" value="vzostupne" <?php echo ($_GET['srt'] != "zostupne")? 'checked':''?>> Vzostupne
+                                                        <input type="radio" name="srt" value="zostupne" <?php echo ($_GET['srt'] == "zostupne")? 'checked':''?>> Zostupne
+                   
+													</div>
+														
+                                                </div>
                                                 </div>
 												
                                                
@@ -151,11 +176,11 @@ if($user->isAdmin()){
                                     //*S*parametrami**//
                                     //****************//   -->
                                     <?php
-                                    $os_cislo = mysqli_real_escape_string($connect,$_POST['osobne_cislo']);
-                                    $meno = mysqli_real_escape_string($connect,$_POST['meno']);
-                                    $priezvisko = mysqli_real_escape_string($connect,$_POST['priezvisko']);
+                                    $os_cislo = mysqli_real_escape_string($connect,$_GET['os_cis']);
+                                    $meno = mysqli_real_escape_string($connect,$_GET['meno']);
+                                    $priezvisko = mysqli_real_escape_string($connect,$_GET['priezvisko']);
                                     
-                                    if(!empty($_POST['os_cis']) || !empty($_POST['meno']) || !empty($_POST['priezvisko']) || !empty($_POST['ldap']) || !empty($_POST['aktivny']) || !empty($_POST['zoradenie']) || !empty($_POST['fromDate']) || !empty($_POST['toDate']) || !empty($_POST['skupina']) || !empty($_POST['cislo_karty'])){
+                                    if(!empty($_GET['os_cis']) || !empty($_GET['meno']) || !empty($_GET['priezvisko']) || !empty($_GET['ldap']) || !empty($_GET['aktivny']) || !empty($_GET['zoradenie']) || !empty($_GET['fromDate']) || !empty($_GET['toDate']) || !empty($_GET['skupina']) || !empty($_GET['cislo_karty'])){
                                         $conditions=array();
                                     
      ?>
@@ -182,37 +207,37 @@ if($user->isAdmin()){
 				
 												$search_query="SELECT * FROM employees ";
                                         
-                                        if(!empty($_POST['skupina'])){
+                                        if(!empty($_GET['skupina'])){
                                             $search_query.="INNER JOIN user_groups ON employees.osobne_cislo=user_groups.osobne_cislo ";
-                                            $conditions[]="user_groups.id_skupiny = '".$_POST['skupina']."'";
+                                            $conditions[]="user_groups.id_skupiny = '".$_GET['skupina']."' ";
                                         }
-                                        if(!empty($_POST['os_cis'])){
-                                            $conditions[]= "osobne_cislo LIKE ('%".$_POST['os_cis']."%')";
-                                        }
-                                        
-                                        if(!empty($_POST['meno'])){
-                                            $conditions[]= "menoBD LIKE ('%".url_slug($_POST['meno'])."%')";
+                                        if(!empty($_GET['os_cis'])){
+                                            $conditions[]= "employees.osobne_cislo LIKE ('%".$_GET['os_cis']."%')";
                                         }
                                         
-                                        if(!empty($_POST['priezvisko'])){
-                                            $conditions[]= "priezviskoBD LIKE ('%".url_slug($_POST['priezvisko'])."%')";
+                                        if(!empty($_GET['meno'])){
+                                            $conditions[]= "employees.menoBD LIKE ('%".url_slug($_GET['meno'])."%')";
                                         }
                                         
-                                        if(!empty($_POST['ldap'])){
-                                            $conditions[]= "ldap = '".$_POST['ldap']."'";
+                                        if(!empty($_GET['priezvisko'])){
+                                            $conditions[]= "employees.priezviskoBD LIKE ('%".url_slug($_GET['priezvisko'])."%')";
                                         }
                                         
-                                        if(!empty($_POST['aktivny'])){
-                                            $conditions[]= "aktivny = '".$_POST['aktivny']."'";
+                                        if(!empty($_GET['ldap'])){
+                                            $conditions[]= "employees.ldap = '".$_GET['ldap']."'";
                                         }
-                                        if(!empty($_POST['fromDate'])){
-                                            $conditions[]= "datum_pridania >= '".$_POST['fromDate']."'";
+                                        
+                                        if(!empty($_GET['aktivny'])){
+                                            $conditions[]= "employees.aktivny = '".$_GET['aktivny']."'";
                                         }
-                                        if(!empty($_POST['toDate'])){
-                                            $conditions[]= "datum_pridania <= '".$_POST['toDate']."'";
+                                        if(!empty($_GET['fromDate'])){
+                                            $conditions[]= "employees.datum_pridania >= '".$_GET['fromDate']."'";
                                         }
-                                        if(!empty($_POST['cislo_karty'])){
-                                            $conditions[]= "cislo_karty LIKE ('%".$_POST['cislo_karty']."%')";
+                                        if(!empty($_GET['toDate'])){
+                                            $conditions[]= "employees.datum_pridania <= '".$_GET['toDate']."'";
+                                        }
+                                        if(!empty($_GET['cislo_karty'])){
+                                            $conditions[]= "employees.cislo_karty LIKE ('%".$_GET['cislo_karty']."%')";
                                         }
                                         
                                         $sql=$search_query;
@@ -221,12 +246,16 @@ if($user->isAdmin()){
                                             $sql.="WHERE ".implode(' AND ',$conditions);    
                                         }
                                         
-                                        if(!empty($_POST['zoradenie'])){
-                                            if($_POST['zoradenie']=="osobne_cislo"){
-                                                $sql.="ORDER BY ".$_POST['zoradenie'];
+                                        if(!empty($_GET['zoradenie'])){
+                                            if($_GET['zoradenie']=="osobne_cislo"){
+                                                $sql.="ORDER BY employees.".$_GET['zoradenie'];
                                             }else{
-                                                $sql.="ORDER BY LOWER(".$_POST['zoradenie'].")";
+                                                $sql.="ORDER BY LOWER(employees.".$_GET['zoradenie'].")";
                                             }
+                                        }
+                                        
+                                        if($_GET['srt']=='zostupne'){
+                                            $sql.=" DESC";
                                         }
                                    
                                         $apply_zaznamy=mysqli_query($connect,$sql);
@@ -234,9 +263,9 @@ if($user->isAdmin()){
 												?>
 												<tr>
 														<td> <?php echo $result_zaznamy['osobne_cislo']; ?></td>
-														<td> <?php echo $result_zaznamy['meno']; ?></td>
-														<td> <?php echo $result_zaznamy['priezvisko']; ?></td>
-														<td> <?php echo $result_zaznamy['email']; ?></td>
+														<td> <?php echo ($result_zaznamy['anonym']==2)?$result_zaznamy['meno']:"*****"; ?></td>
+														<td> <?php echo ($result_zaznamy['anonym']==2)?$result_zaznamy['priezvisko']:"*****"; ?></td>
+														<td> <?php echo ($result_zaznamy['anonym']==2)?$result_zaznamy['email']:"*****"; ?></td>
 														<td> <?php echo ($result_zaznamy['ldap']==1)?"&#9989":"&#10060" ?></td>
 														<td> <?php echo ($result_zaznamy['aktivny']==1)?"&#9989":"&#10060" ?></td>
 														<td>
@@ -253,9 +282,10 @@ if($user->isAdmin()){
                                                             <form method="post"> 
                                                                 
                                                                 <input type="hidden" name="osobne_cislo" value="<?php echo $result_zaznamy['osobne_cislo'] ?>">
-                                                                <button type="button" class="btn"  title="Zmazať zamestnanca" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-pouzivatelov/zaznamy&os_cis=<?php echo $result_zaznamy['osobne_cislo'] ?>';"><i class="fa fa-trash" ></i></button>
+                                                                <button type="button" class="btn"  title="Zmazať zamestnanca" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-pouzivatelov/zaznamy&os_cisFD=<?php echo $result_zaznamy['osobne_cislo'] ?>';"><i class="fa fa-trash" ></i></button>
                                                                 
                                                                 <button class="btn" type="submit" formaction="index.php?modul=upravit-pouzivatela/vlozit-zaznam"><i class="fa fa-edit"></i></button>
+                                                                <button class="btn" type="submit" title="Anonymizovať" name="anonymise" >#</button>
                                                             </form>
                                                             
                                                         </td>
@@ -307,9 +337,9 @@ if($user->isAdmin()){
 												?>
 												<tr>
 														<td> <?php echo $result_zaznamy['osobne_cislo']; ?></td>
-														<td> <?php echo $result_zaznamy['meno']; ?></td>
-														<td> <?php echo $result_zaznamy['priezvisko']; ?></td>
-														<td> <?php echo $result_zaznamy['email']; ?></td>
+														<td> <?php echo ($result_zaznamy['anonym']==2)?$result_zaznamy['meno']:"*****"; ?></td>
+														<td> <?php echo ($result_zaznamy['anonym']==2)?$result_zaznamy['priezvisko']:"*****"; ?></td>
+														<td> <?php echo ($result_zaznamy['anonym']==2)?$result_zaznamy['email']:"*****"; ?></td>
 														<td> <?php echo ($result_zaznamy['ldap']==1)?"&#9989":"&#10060" ?></td>
 														<td> <?php echo ($result_zaznamy['aktivny']==1)?"&#9989":"&#10060" ?></td>
                                                         <td>
@@ -326,14 +356,13 @@ if($user->isAdmin()){
                                                             <form method="post"> 
                                                                 
                                                                 <input type="hidden" name="osobne_cislo" value="<?php echo $result_zaznamy['osobne_cislo'] ?>">
-                                                                <button type="button" class="btn"  title="Zmazať zamestnanca" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-pouzivatelov/zaznamy&os_cis=<?php echo $result_zaznamy['osobne_cislo'] ?>';"><i class="fa fa-trash" ></i></button>
+                                                                <button type="button" class="btn"  title="Zmazať zamestnanca" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-pouzivatelov/zaznamy&os_cisFD=<?php echo $result_zaznamy['osobne_cislo'] ?>';"><i class="fa fa-trash" ></i></button>
                                                                 
-                                                                <button class="btn" type="submit" formaction="index.php?modul=upravit-pouzivatela/vlozit-zaznam"><i class="fa fa-edit"></i></button>
+                                                                <button class="btn" type="submit" title="Upraviť info o zamestnancovi" formaction="index.php?modul=upravit-pouzivatela/vlozit-zaznam"><i class="fa fa-edit"></i></button>
+                                                                <button class="btn" type="submit" title="Anonymizovať" name="anonymise" >#</button>
                                                             </form>
                                                             
                                                         </td>
-                                                        
-														
 														
                                                        
                                                     </tr>
@@ -353,7 +382,7 @@ if($user->isAdmin()){
                                 </div>
 						
  </div>
- <?php if(isset($_GET['os_cis'])){ ?>
+ <?php if(isset($_GET['os_cisFD'])){ ?>
  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -363,11 +392,11 @@ if($user->isAdmin()){
         </button>
       </div>
           <div class="modal-body">
-            Naozaj chcete odstrániť používateľa č. <?php echo $_GET['os_cis'] ?> zo systému?
+            Naozaj chcete odstrániť používateľa č. <?php echo $_GET['os_cisFD'] ?> zo systému?
           </div>
           <div class="modal-footer">
                 <form method="post">
-                    <input type="hidden" name="osobne_cislo" value="<?php echo $_GET['os_cis'] ?>">
+                    <input type="hidden" name="osobne_cislo" value="<?php echo $_GET['os_cisFD'] ?>">
                     <button type="submit" name="nothing" class="btn btn-secondary" formaction="index.php?modul=spravovat-pouzivatelov/zaznamy">Zrušiť</button>
                     <button type="submit" name="delete" class="btn btn-primary" formaction="index.php?modul=spravovat-pouzivatelov/zaznamy">Vymazať</button>
                 </form>
