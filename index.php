@@ -231,7 +231,7 @@ if(empty($modul)){$modul="mod_404.php";}
                                             <i class="fa fa-group"></i><span class="title">Vytvoriť skupinu</span>
                                         </a>
                                    </li>   
-								
+								  							
 							
 									<li class="heading">
                                 <h3 class="uppercase"><hr></h3>
@@ -249,6 +249,7 @@ if(empty($modul)){$modul="mod_404.php";}
                                             <i class="fa fa-book fa-fw"></i><span class="title">Spravovanie skupín</span>
                                         </a>
                                    </li>
+								   
 								  
                           
                                 </ul>

@@ -181,7 +181,7 @@ if($user->isAdmin()){
                                     $priezvisko = mysqli_real_escape_string($connect,$_GET['priezvisko']);
                                     
                                     if(!empty($_GET['os_cis']) || !empty($_GET['meno']) || !empty($_GET['priezvisko']) || !empty($_GET['ldap']) || !empty($_GET['aktivny']) || !empty($_GET['zoradenie']) || !empty($_GET['fromDate']) || !empty($_GET['toDate']) || !empty($_GET['skupina']) || !empty($_GET['cislo_karty'])){
-                                        $conditions=array();
+                                            $conditions=array();
                                     
      ?>
                                   
