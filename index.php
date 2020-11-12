@@ -80,7 +80,7 @@ if(empty($modul)){$modul="mod_404.php";}
 
     <head>
         <meta charset="utf-8" />
-        <title>SMD ZÁZNAMY</title>
+        <title>User manager</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta content="width=device-width, initial-scale=1" name="viewport" />
      
@@ -128,8 +128,8 @@ if(empty($modul)){$modul="mod_404.php";}
                     <!-- BEGIN LOGO -->
                     <div class="page-logo">
                         <a href="">
-                            <img src="images/smd-zaznamy-logo.png" alt="logo" class="logo-default"  /> </a>
-                        <div class="menu-toggler sidebar-toggler">
+                            <img src="images/Logo-next.png" alt="logo" class="logo-default"  style="margin-top:0%; margin-left:-5%; padding-right:20px;"/> </a>
+                        <div class="menu-toggler sidebar-toggler" style="margin-left:-25%;">
                             <span></span>
                         </div>
                     </div>
@@ -427,7 +427,7 @@ else{
         <!-- BEGIN LOGO -->
         <div class="logo">
             <a href="index.html">
-                <img src="images/smd-zaznamy-logo-big.png" alt=""  style="height:40px"/> </a>
+                <img src="images/Logo.png" alt=""  style="width:228px; height:51px;"/> </a>
         </div>
         <!-- END LOGO -->
         <!-- BEGIN LOGIN -->
