@@ -147,7 +147,7 @@ include "functions.php";
                                         <form class="form-horizontal" role="form" method="post">
                                             <div class="form-body">
                                                 <div class="form-group">
-                                                    
+                                                    <input type="hidden" name="modul" value="upravit-skupinu/zaznam">
                                                     <div class="col-md-2">
                                                     Osobné číslo:
                                                     <input class="form-control" type="text" placeholder="Osobne číslo"  name="os_cis" pattern="[0-9]+" value="<?php echo $os_cis ?>">	

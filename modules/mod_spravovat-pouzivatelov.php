@@ -203,7 +203,11 @@ if($user->isAdmin()){
                                                 </thead>
                                                 <tbody>
 												<?php
-																				
+												$page = (int) (!isset($parameter[2]) ? 1 : $parameter[2]);
+                                                $limit = 2;
+                                                $url="?os_cis=".$_GET['os_cis']."&meno=".$_GET['meno']."&priezvisko=".$_GET['priezvisko']."&ldap=".$_GET['ldap']."&aktivny=".$_GET['aktivny']."&skupina=".$_GET['skupina']."&cislo_karty=".$_GET['cislo_karty']."&fromDate=".$_GET['fromDate']."&toDate=".$_GET['toDate']."&zoradenie=".$_GET['zoradenie']."&srt=".$_GET['srt']."&modul=spravovat-pouzivatelov/zaznamy/";
+                                                $startpoint = ($page * $limit) - $limit;
+                                                $c=$connect;								
 				
 												$search_query="SELECT * FROM employees ";
                                         
@@ -241,23 +245,31 @@ if($user->isAdmin()){
                                         }
                                         
                                         $sql=$search_query;
+                                        $sqlForPaging="";
                                         
                                         if(count($conditions)>0){
-                                            $sql.="WHERE ".implode(' AND ',$conditions);    
+                                            $sql.="WHERE ".implode(' AND ',$conditions);
+                                            $sqlForPaging.="WHERE ".implode(' AND ',$conditions);
                                         }
                                         
                                         if(!empty($_GET['zoradenie'])){
                                             if($_GET['zoradenie']=="osobne_cislo"){
                                                 $sql.="ORDER BY employees.".$_GET['zoradenie'];
+                                                $sqlForPaging.="ORDER BY employees.".$_GET['zoradenie'];
                                             }else{
                                                 $sql.="ORDER BY LOWER(employees.".$_GET['zoradenie'].")";
+                                                $sqlForPaging.="ORDER BY LOWER(employees.".$_GET['zoradenie'].")";
                                             }
                                         }
                                         
                                         if($_GET['srt']=='zostupne'){
                                             $sql.=" DESC";
+                                            $sqlForPaging.=" DESC";
                                         }
                                    
+                                        $sql.=" LIMIT $startpoint, $limit";
+                                        echo $sql;
+                                        
                                         $apply_zaznamy=mysqli_query($connect,$sql);
 												while($result_zaznamy=mysqli_fetch_array($apply_zaznamy)){
 												?>
@@ -299,7 +311,7 @@ if($user->isAdmin()){
 													
                                                 </tbody>
                                             </table>
-											<?php	echo "<center>".pagination($statement,$limit,$page,$url,$c)."</center>"; ?>
+											<?php	echo "<center>".pagination_search("employees ".$sqlForPaging,$limit,$page,$url,$c)."</center>"; ?>
 															
                                         </div>
 								
@@ -329,9 +341,13 @@ if($user->isAdmin()){
                                                 </thead>
                                                 <tbody>
 												<?php
-																				
+												$page = (int) (!isset($parameter[2]) ? 1 : $parameter[2]);
+                                                $limit = 10;
+                                                $url="?modul=spravovat-pouzivatelov/zaznamy";
+                                                $startpoint = ($page * $limit) - $limit;
+                                                $c=$connect;								
 				
-												$query_zaznamy="SELECT * FROM employees";
+												$query_zaznamy="SELECT * FROM employees LIMIT $startpoint, $limit";
 												$apply_zaznamy=mysqli_query($connect,$query_zaznamy);
 												while($result_zaznamy=mysqli_fetch_array($apply_zaznamy)){
 												?>
@@ -371,7 +387,7 @@ if($user->isAdmin()){
 													
                                                 </tbody>
                                             </table>
-											<?php	echo "<center>".pagination($statement,$limit,$page,$url,$c)."</center>"; ?>
+											<?php	echo "<center>".pagination("employees",$limit,$page,$url,$c)."</center>"; ?>
 															
                                         </div>
 								

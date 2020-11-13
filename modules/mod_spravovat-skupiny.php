@@ -15,12 +15,12 @@ if($user->isAdmin()){
     $fromDate="";
     $toDate="";
     $zoradenie="";
-    if(isset($_POST['search'])){
-        $meno = $_POST['meno'];
-        $fromDate = $_POST['fromDate'];
-        $toDate = $_POST['toDate'];
-        $zoradenie = $_POST['zoradenie'];
-    }
+    
+        $meno = $_GET['meno'];
+        $fromDate = $_GET['fromDate'];
+        $toDate = $_GET['toDate'];
+        $zoradenie = $_GET['zoradenie'];
+    
     
     ?>
  <div class="portlet box blue">
@@ -36,10 +36,10 @@ if($user->isAdmin()){
                                     </div>
                                     
                                     <div class="portlet-body form">
-                                        <form class="form-horizontal" role="form" method="post">
+                                        <form class="form-horizontal" role="form" method="get">
                                             <div class="form-body">
                                                 <div class="form-group">
-                                                    
+                                                     <input type="hidden" name="modul" value="spravovat-skupiny/zaznamy">
                                                     <div class="col-md-2">
                                                     Názov skupiny:
                                                     <input class="form-control" type="text" placeholder="Meno"  name="meno" value="<?php echo $meno ?>">		
@@ -70,8 +70,8 @@ if($user->isAdmin()){
                                                     <!--<label class="col-md-2 control-label">Usporiadať</label>-->
                                                     <div class="col-md-2">
                                                     <br>
-													    <input type="radio" name="srt" value="vzostupne" <?php echo ($_POST['srt'] != "zostupne")? 'checked':''?>> Vzostupne
-                                                        <input type="radio" name="srt" value="zostupne" <?php echo ($_POST['srt'] == "zostupne")? 'checked':''?>> Zostupne
+													    <input type="radio" name="srt" value="vzostupne" <?php echo ($_GET['srt'] != "zostupne")? 'checked':''?>> Vzostupne
+                                                        <input type="radio" name="srt" value="zostupne" <?php echo ($_GET['srt'] == "zostupne")? 'checked':''?>> Zostupne
                    
 													</div>
 														
@@ -108,11 +108,11 @@ if($user->isAdmin()){
                                     //*S*parametrami**//
                                     //****************//   -->
                                     <?php
-                                    $os_cislo = mysqli_real_escape_string($connect,$_POST['osobne_cislo']);
-                                    $meno = mysqli_real_escape_string($connect,$_POST['meno']);
-                                    $priezvisko = mysqli_real_escape_string($connect,$_POST['priezvisko']);
+                                    $os_cislo = mysqli_real_escape_string($connect,$_GET['osobne_cislo']);
+                                    $meno = mysqli_real_escape_string($connect,$_GET['meno']);
+                                    $priezvisko = mysqli_real_escape_string($connect,$_GET['priezvisko']);
                                     
-                                    if(!empty($_POST['meno']) || !empty($_POST['fromDate']) || !empty($_POST['toDate']) || !empty($_POST['zoradenie'])){
+                                    if(!empty($_GET['meno']) || !empty($_GET['fromDate']) || !empty($_GET['toDate']) || !empty($_GET['zoradenie'])){
                                         $conditions=array();
                                     
      ?>
@@ -131,42 +131,55 @@ if($user->isAdmin()){
                                                 </thead>
                                                 <tbody>
 												<?php
+                                                $page = (int) (!isset($parameter[2]) ? 1 : $parameter[2]);
+                                                $limit = 1;
+                                                $url="?meno=".$_GET['meno']."&fromDate=".$_GET['fromDate']."&toDate=".$_GET['toDate']."&zoradenie=".$_GET['zoradenie']."&id_skupiny=".$_GET['id_skupiny']."&srt=".$_GET['srt']."&modul=spravovat-skupiny/zaznamy/";
+                                                $startpoint = ($page * $limit) - $limit;
+                                                $c=$connect;   
 																				
 				                            if($_POST['zoradenie']=="pocet_zamestnancov"){
                                                 $search_query="SELECT groups.*, COUNT(user_groups.osobne_cislo) AS pocet_zamestnancov FROM groups INNER JOIN user_groups ON groups.id_skupiny=user_groups.id_skupiny ";
                                             }else{
 												$search_query="SELECT * FROM groups ";
                                             }
-                                        if(!empty($_POST['meno'])){
-                                            $conditions[]= "menoBD LIKE ('%".url_slug($_POST['meno'])."%')";
+                                        if(!empty($_GET['meno'])){
+                                            $conditions[]= "menoBD LIKE ('%".url_slug($_GET['meno'])."%')";
                                         }
                                         
-                                        if(!empty($_POST['fromDate'])){
-                                            $conditions[]= "datum_pridania >= '".$_POST['fromDate']."'";
+                                        if(!empty($_GET['fromDate'])){
+                                            $conditions[]= "datum_pridania >= '".$_GET['fromDate']."'";
                                         }
-                                        if(!empty($_POST['toDate'])){
-                                            $conditions[]= "datum_pridania <= '".$_POST['toDate']."'";
+                                        if(!empty($_GET['toDate'])){
+                                            $conditions[]= "datum_pridania <= '".$_GET['toDate']."'";
                                         }
                                         
                                         $sql=$search_query;
+                                        $sqlForPagination="";
                                         
                                         if(count($conditions)>0){
-                                            $sql.="WHERE ".implode(' AND ',$conditions);    
+                                            $sql.="WHERE ".implode(' AND ',$conditions); 
+                                            $sqlForPagination.="WHERE ".implode(' AND ',$conditions); 
                                         }
                                         
-                                        if(!empty($_POST['zoradenie'])){
-                                            if($_POST['zoradenie']=="id_skupiny"){
-                                                $sql.="ORDER BY ".$_POST['zoradenie'];
-                                            }elseif($_POST['zoradenie']=="pocet_zamestnancov"){
+                                        if(!empty($_GET['zoradenie'])){
+                                            if($_GET['zoradenie']=="id_skupiny"){
+                                                $sql.="ORDER BY ".$_GET['zoradenie'];
+                                                $sqlForPagination.="ORDER BY ".$_GET['zoradenie'];
+                                            }elseif($_GET['zoradenie']=="pocet_zamestnancov"){
                                                 $sql.="GROUP BY user_groups.id_skupiny ORDER BY pocet_zamestnancov";
+                                                $sqlForPagination.="GROUP BY user_groups.id_skupiny ORDER BY pocet_zamestnancov";
                                             }else{
-                                                $sql.="ORDER BY LOWER(".$_POST['zoradenie'].")";
+                                                $sql.="ORDER BY LOWER(".$_GET['zoradenie'].")";
+                                                $sqlForPagination.="ORDER BY LOWER(".$_GET['zoradenie'].")";
                                             }
                                         }
                                         
-                                        if($_POST['srt']=='zostupne'){
+                                        if($_GET['srt']=='zostupne'){
                                             $sql.=" DESC";
+                                            $sqlForPagination.=" DESC";
                                         }
+                                        
+                                        $sql.=" LIMIT $startpoint, $limit"; 
 
                                         $apply_zaznamy=mysqli_query($connect,$sql);
 												while($result_zaznamy=mysqli_fetch_array($apply_zaznamy)){
@@ -188,7 +201,7 @@ if($user->isAdmin()){
                                                             <form method="post"> 
                                                                 
                                                                 <input type="hidden" name="osobne_cislo" value="<?php echo $result_zaznamy['osobne_cislo'] ?>">
-                                                                <button type="button" class="btn"  title="Zmazať zamestnanca" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-pouzivatelov/zaznamy&os_cis=<?php echo $result_zaznamy['osobne_cislo'] ?>';"><i class="fa fa-trash" ></i></button>
+                                                                <button type="button" class="btn"  title="Zmazať zamestnanca" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-skupiny/zaznamy&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>&action=delete';"><i class="fa fa-trash" ></i></button>
                                                                 
                                                                 <button class="btn" type="submit" formaction="index.php?modul=upravit-skupinu/vlozit-zaznam&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>&meno_skupiny=<?php echo $result_zaznamy['meno']?>"><i class="fa fa-edit"></i></button>
                                                             </form>
@@ -204,7 +217,7 @@ if($user->isAdmin()){
 													
                                                 </tbody>
                                             </table>
-											<?php	echo "<center>".pagination($statement,$limit,$page,$url,$c)."</center>"; ?>
+											<?php	echo "<center>".pagination_search("groups ".$sqlForPagination,$limit,$page,$url,$c)."</center>"; ?>
 															
                                         </div>
 								
@@ -230,9 +243,13 @@ if($user->isAdmin()){
                                                 </thead>
                                                 <tbody>
 												<?php
-																				
+												$page = (int) (!isset($parameter[2]) ? 1 : $parameter[2]);
+                                                $limit = 10;
+                                                $url="?modul=spravovat-skupiny/zaznamy";
+                                                $startpoint = ($page * $limit) - $limit;
+                                                $c=$connect;							
 				
-												$query_zaznamy="SELECT * FROM groups";
+												$query_zaznamy="SELECT * FROM groups LIMIT $startpoint, $limit";
 												$apply_zaznamy=mysqli_query($connect,$query_zaznamy);
 												while($result_zaznamy=mysqli_fetch_array($apply_zaznamy)){
 												?>
@@ -252,7 +269,7 @@ if($user->isAdmin()){
                                                             <form method="post"> 
                                                                 
                                                                 <input type="hidden" name="id_skupiny" value="<?php echo $result_zaznamy['id_skupiny'] ?>">
-                                                                <button type="button" class="btn"  title="Odstrániť skupinu" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-skupiny/zaznamy&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>';"><i class="fa fa-trash" ></i></button>
+                                                                <button type="button" class="btn"  title="Odstrániť skupinu" data-toggle="modal" data-target="#deleteModal" name="forDelete"   onclick="location.href='index.php?modul=spravovat-skupiny/zaznamy&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>&action=delete';"><i class="fa fa-trash" ></i></button>
                                                                 
                                                                 <button class="btn" type="submit" formaction="index.php?modul=upravit-skupinu/vlozit-zaznam&id_skupiny=<?php echo $result_zaznamy['id_skupiny'] ?>&meno_skupiny=<?php echo $result_zaznamy['meno']?>&popis_skupiny=<?php echo $result_zaznamy['popis']?>"><i class="fa fa-edit"></i></button>
                                                             </form>
@@ -268,7 +285,7 @@ if($user->isAdmin()){
 													
                                                 </tbody>
                                             </table>
-											<?php	echo "<center>".pagination($statement,$limit,$page,$url,$c)."</center>"; ?>
+											<?php	echo "<center>".pagination("groups",$limit,$page,$url,$c)."</center>"; ?>
 															
                                         </div>
 								
@@ -279,7 +296,7 @@ if($user->isAdmin()){
                                 </div>
 						
  </div>
- <?php if(isset($_GET['id_skupiny'])){ ?>
+ <?php if($_GET['action']=="delete"){ ?>
  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog" role="document">
     <div class="modal-content">
